@@ -1,14 +1,29 @@
-# text: String Functions in SQLite
+# text: String functions in SQLite
 
-A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `trim` and `repeat`.
+The `sqlean-text` extension provides a rich set of functions for working with text.
 
-Provides 25 functions, many of which are postgres-compatible (i.e. they have the same alias and logic as in PostgreSQL). It can be useful when migrating from SQLite to PostgreSQL or vice versa.
+Also provides Unicode-aware functions for changing text case (upper, lower, title), plus a custom nocase collation.
 
-Note that some unicode-related functions like `upper` and `lower` are in the separate [`unicode`](unicode.md) extension. Regular expression functions are in the separate [`regexp`](regexp.md) extension.
+Many of the functions are Postgres-compatible (i.e. they have the same alias and logic as in PostgreSQL). It can be useful when migrating from SQLite to PostgreSQL or vice versa.
+
+Regular expression functions are in the separate [regexp](regexp.md) extension.
+
+[Substrings and slicing](#substrings-and-slicing) •
+[Search and match](#search-and-match) •
+[Split and join](#split-and-join) •
+[Trim and pad](#trim-and-pad) •
+[Change case](#change-case) •
+[Other modifications](#other-modifications) •
+[String properties](#string-properties) •
+[Installation and usage](#installation-and-usage)
 
 ## Substrings and slicing
 
-<h3 name="text_substring"><code>text_substring(str, start [,length])</code></h3>
+### text_substring
+
+```text
+text_substring(str, start [,length])
+```
 
 Extracts a substring of `length` characters starting at the `start` position (1-based). By default, extracts all characters from `start` to the end of the string.
 
@@ -22,7 +37,11 @@ select text_substring('hello world', 7, 5);
 
 Postgres-compatible (`substr`), but not aliased as `substr` to avoid conflicts with the built-in `substr` SQLite function.
 
-<h3 name="text_slice"><code>text_slice(str, start [,end])</code></h3>
+### text_slice
+
+```
+text_slice(str, start [,end])
+```
 
 Extracts a substring from the `start` position inclusive to the `end` position non-inclusive (1-based). By default, `end` is the end of the string.
 
@@ -42,7 +61,11 @@ select text_slice('hello world', -5, -2);
 -- wor
 ```
 
-<h3 name="text_left"><code>text_left(str, length)</code></h3>
+### text_left
+
+```text
+text_left(str, length)
+```
 
 Extracts a substring of `length` characters from the beginning of the string. For negative `length`, extracts all but the last `|length|` characters.
 
@@ -56,7 +79,11 @@ select text_left('hello world', -6);
 
 Postgres-compatible, aliased as `left`.
 
-<h3 name="text_right"><code>text_right(str, length)</code></h3>
+### text_right
+
+```text
+text_right(str, length)
+```
 
 Extracts a substring of `length` characters from the end of the string. For negative `length`, extracts all but the first `|length|` characters.
 
@@ -72,7 +99,11 @@ Postgres-compatible, aliased as `right`.
 
 ## Search and match
 
-<h3 name="text_index"><code>text_index(str, other)</code></h3>
+### text_index
+
+```text
+text_index(str, other)
+```
 
 Returns the first index of the `other` substring in the original string.
 
@@ -86,7 +117,11 @@ select text_index('hello yellow', 'x');
 
 Postgres-compatible, aliased as `strpos`.
 
-<h3 name="text_last_index"><code>text_last_index(str, other)</code></h3>
+### text_last_index
+
+```text
+text_last_index(str, other)
+```
 
 Returns the last index of the `other` substring in the original string.
 
@@ -98,7 +133,11 @@ select text_last_index('hello yellow', 'x');
 -- 0
 ```
 
-<h3 name="text_contains"><code>text_contains(str, other)</code></h3>
+### text_contains
+
+```text
+text_contains(str, other)
+```
 
 Checks if the string contains the `other` substring.
 
@@ -110,7 +149,11 @@ select text_contains('hello yellow', 'x');
 -- 0
 ```
 
-<h3 name="text_has_prefix"><code>text_has_prefix(str, other)</code></h3>
+### text_has_prefix
+
+```text
+text_has_prefix(str, other)
+```
 
 Checks if the string starts with the `other` substring.
 
@@ -124,7 +167,11 @@ select text_has_prefix('hello yellow', 'yellow');
 
 Postgres-compatible, aliased as `starts_with`.
 
-<h3 name="text_has_suffix"><code>text_has_suffix(str, other)</code></h3>
+### text_has_suffix
+
+```text
+text_has_suffix(str, other)
+```
 
 Checks if the string ends with the `other` substring.
 
@@ -136,7 +183,11 @@ select text_has_suffix('hello yellow', 'yellow');
 -- 1
 ```
 
-<h3 name="text_count"><code>text_count(str, other)</code></h3>
+### text_count
+
+```text
+text_count(str, other)
+```
 
 Counts how many times the `other` substring is contained in the original string.
 
@@ -148,9 +199,31 @@ select text_count('hello yellow', 'x') = 0;
 -- 0
 ```
 
+### text_like
+
+```text
+text_like(pattern, str)
+```
+
+Reports whether a string matches a pattern using the LIKE syntax.
+
+```sql
+select text_like('cóm_ está_', 'CÓMO ESTÁS');
+-- 1
+
+select text_like('ça%', 'Ça roule');
+-- 1
+```
+
+Not aliased as `like` to avoid conflicts with the built-in `like` SQLite function.
+
 ## Split and join
 
-<h3 name="text_split"><code>text_split(str, sep, n)</code></h3>
+### text_split
+
+```text
+text_split(str, sep, n)
+```
 
 Splits a string by a separator and returns the n-th part (counting from one). When `n` is negative, returns the `|n|`th-from-last part.
 
@@ -161,13 +234,17 @@ select text_split('one|two|three', '|', 2);
 select text_split('one|two|three', '|', -1);
 -- three
 
-text_split('one|two|three', ';', 2);
+select text_split('one|two|three', ';', 2);
 -- (empty string)
 ```
 
 Postgres-compatible, aliased as `split_part`.
 
-<h3 name="text_concat"><code>text_concat(str, ...)</code></h3>
+### text_concat
+
+```text
+text_concat(str, ...)
+```
 
 Concatenates strings and returns the resulting string. Ignores nulls.
 
@@ -181,7 +258,11 @@ select text_concat('one', null, 'three');
 
 Postgres-compatible, aliased as `concat`.
 
-<h3 name="text_join"><code>text_join(sep, str, ...)</code></h3>
+### text_join
+
+```text
+text_join(sep, str, ...)
+```
 
 Joins strings using the separator and returns the resulting string. Ignores nulls.
 
@@ -195,7 +276,11 @@ select text_join('|', 'one', null, 'three');
 
 Postgres-compatible, aliased as `concat_ws`.
 
-<h3 name="text_repeat"><code>text_repeat(str, count)</code></h3>
+### text_repeat
+
+```text
+text_repeat(str, count)
+```
 
 Concatenates the string to itself a given number of times and returns the resulting string.
 
@@ -208,7 +293,11 @@ Postgres-compatible, aliased as `repeat`.
 
 ## Trim and pad
 
-<h3 name="text_ltrim"><code>text_ltrim(str [,chars])</code></h3>
+### text_ltrim
+
+```text
+text_ltrim(str [,chars])
+```
 
 Trims certain characters (spaces by default) from the beginning of the string.
 
@@ -222,7 +311,11 @@ select text_ltrim('273hello', '123456789');
 
 Postgres-compatible, aliased as `ltrim`.
 
-<h3 name="text_rtrim"><code>text_rtrim(str [,chars])</code></h3>
+### text_rtrim
+
+```text
+text_rtrim(str [,chars])
+```
 
 Trims certain characters (spaces by default) from the end of the string.
 
@@ -236,7 +329,11 @@ select text_rtrim('hello273', '123456789');
 
 Postgres-compatible, aliased as `rtrim`.
 
-<h3 name="text_trim"><code>text_trim(str [,chars])</code></h3>
+### text_trim
+
+```text
+text_trim(str [,chars])
+```
 
 Trims certain characters (spaces by default) from the beginning and end of the string.
 
@@ -250,7 +347,11 @@ select text_trim('273hello273', '123456789');
 
 Postgres-compatible, aliased as `btrim`.
 
-<h3 name="text_lpad"><code>text_lpad(str, length [,fill])</code></h3>
+### text_lpad
+
+```text
+text_lpad(str, length [,fill])
+```
 
 Pads the string to the specified length by prepending certain characters (spaces by default).
 
@@ -266,7 +367,11 @@ Postgres-compatible, aliased as `lpad`.
 
 ℹ️ PostgreSQL does not support unicode strings in `lpad`, while this function does.
 
-<h3 name="text_rpad"><code>text_rpad(str, length [,fill])</code></h3>
+### text_rpad
+
+```text
+text_rpad(str, length [,fill])
+```
 
 Pads the string to the specified length by appending certain characters (spaces by default).
 
@@ -282,9 +387,70 @@ Postgres-compatible, aliased as `rpad`.
 
 ℹ️ PostgreSQL does not support unicode strings in `rpad`, while this function does.
 
+## Change case
+
+### text_upper
+
+```text
+text_upper(str)
+```
+
+Transforms a string to upper case.
+
+```sql
+select text_upper('cómo estás');
+-- CÓMO ESTÁS
+```
+
+Not aliased as `upper` to avoid conflicts with the built-in `upper` SQLite function.
+
+### text_lower
+
+```text
+text_lower(str)
+```
+
+Transforms a string to lower case.
+
+```sql
+select text_lower('CÓMO ESTÁS');
+-- cómo estás
+```
+
+Not aliased as `lower` to avoid conflicts with the built-in `lower` SQLite function.
+
+### text_title
+
+```text
+text_title(str)
+```
+
+Transforms a string to title case.
+
+```sql
+select text_title('cómo estás');
+-- Cómo Estás
+```
+
+### text_nocase
+
+The `text_nocase` collating sequence compares strings without regard to case.
+
+```sql
+select 1 where 'cómo estás' = 'CÓMO ESTÁS';
+-- (null)
+
+select 1 where 'cómo estás' = 'CÓMO ESTÁS' collate text_nocase;
+-- 1
+```
+
 ## Other modifications
 
-<h3 name="text_replace"><code>text_replace(str, old, new [,count])</code></h3>
+### text_replace
+
+```text
+text_replace(str, old, new [,count])
+```
 
 Replaces `old` substrings with `new` substrings in the original string, but not more than `count` times. By default, replaces all `old` substrings.
 
@@ -298,7 +464,11 @@ select text_replace('hello', 'l', '*', 1);
 
 Postgres-compatible (`replace`), but not aliased as `replace` to avoid conflicts with the built-in `replace` SQLite function.
 
-<h3 name="text_translate"><code>text_translate(str, from, to)</code></h3>
+### text_translate
+
+```text
+text_translate(str, from, to)
+```
 
 Replaces each string character that matches a character in the `from` set with the corresponding character in the `to` set. If `from` is longer than `to`, occurrences of the extra characters in `from` are deleted.
 
@@ -314,7 +484,11 @@ Postgres-compatible, aliased as `translate`.
 
 ℹ️ PostgreSQL does not support unicode strings in `translate`, while this function does.
 
-<h3 name="text_reverse"><code>text_reverse(str)</code></h3>
+### text_reverse
+
+```text
+text_reverse(str)
+```
 
 Reverses the order of the characters in the string.
 
@@ -329,7 +503,11 @@ Postgres-compatible, aliased as `reverse`.
 
 ## String properties
 
-<h3 name="text_length"><code>text_length(str)</code></h3>
+### text_length
+
+```text
+text_length(str)
+```
 
 Returns the number of characters in the string.
 
@@ -340,7 +518,11 @@ select text_length('𐌀𐌁𐌂');
 
 Postgres-compatible, aliased as `char_length` and `character_length`.
 
-<h3 name="text_size"><code>text_size(str)</code></h3>
+### text_size
+
+```text
+text_size(str)
+```
 
 Returns the number of bytes in the string.
 
@@ -351,7 +533,11 @@ select text_size('𐌀𐌁𐌂');
 
 Postgres-compatible, aliased as `octet_length`.
 
-<h3 name="text_bitsize"><code>text_bitsize(str)</code></h3>
+### text_bitsize
+
+```text
+text_bitsize(str)
+```
 
 Returns the number of bits in the string.
 
@@ -362,17 +548,19 @@ select text_bitsize('one');
 
 Postgres-compatible, aliased as `bit_length`.
 
-## Installation and Usage
+## Installation and usage
 
 SQLite command-line interface:
 
 ```
 sqlite> .load ./text
-sqlite> select reverse('hello');
+sqlite> select text_reverse('hello');
 ```
 
-See [How to Install an Extension](install.md) for usage with IDE, Python, etc.
+See [How to install an extension](install.md) for usage with IDE, Python, etc.
 
-[⬇️ Download](https://github.com/nalgeon/sqlean/releases/latest) •
-[✨ Explore](https://github.com/nalgeon/sqlean) •
-[🚀 Follow](https://antonz.org/subscribe/)
+↓ [Download](https://github.com/nalgeon/sqlean/releases/latest) the extension.
+
+⛱ [Explore](https://github.com/nalgeon/sqlean) other extensions.
+
+★ [Subscribe](https://antonz.org/subscribe/) to stay on top of new features.

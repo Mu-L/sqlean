@@ -1,108 +1,214 @@
-# fuzzy: Fuzzy String Matching and Phonetics in SQLite
+# fuzzy: Fuzzy string matching and phonetics in SQLite
 
-Fuzzy-matching helpers:
+The `sqlean-fuzzy` extension provides fuzzy-matching helpers:
 
 -   Measure distance between two strings.
 -   Compute phonetic string code.
 -   Transliterate a string.
 
-Adapted from [libstrcmp](https://github.com/Rostepher/libstrcmp) by Ross Bayer and [spellfix.c](https://www.sqlite.org/src/file/ext/misc/spellfix.c) by D. Richard Hipp.
+If you want a ready-to-use mechanism to search a large vocabulary for close matches, see the [spellfix](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002297477) extension instead.
 
-If you want a ready-to-use mechanism to search a large vocabulary for close matches, see the [spellfix](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002297477) extension.
+[String distances](#string-distances) •
+[Phonetic codes](#phonetic-codes) •
+[Transliteration](#transliteration) •
+[Acknowledgements](#acknowledgements) •
+[Installation and usage](#installation-and-usage)
 
-## String Distances
+## String distances
 
-Measure distance between two strings:
+These functions measure the distance between two strings.
 
--   `dlevenshtein(x, y)` - Damerau-Levenshtein distance,
--   `edit_distance(x, y)` - Spellcheck edit distance,
--   `hamming(x, y)` - Hamming distance,
--   `jaro_winkler(x, y)` - Jaro-Winkler distance,
--   `levenshtein(x, y)` - Levenshtein distance,
--   `osa_distance(x, y)` - Optimal String Alignment distance.
+Only ASCII strings are supported. Use the [translit](#transliteration) function to convert the input string from UTF-8 to plain ASCII.
 
-```
-sqlite> select dlevenshtein('awesome', 'aewsme');
-2
+[damlev](#fuzzy_damlev) •
+[editdist](#fuzzy_editdist) •
+[hamming](#fuzzy_hamming) •
+[jarowin](#fuzzy_jarowin) •
+[leven](#fuzzy_leven) •
+[osadist](#fuzzy_osadist)
 
-sqlite> select edit_distance('awesome', 'aewsme');
-215
+### fuzzy_damlev
 
-sqlite> select hamming('awesome', 'aewsome');
-2
-
-sqlite> select jaro_winkler('awesome', 'aewsme');
-0.907
-
-sqlite> select levenshtein('awesome', 'aewsme');
-3
-
-sqlite> select osa_distance('awesome', 'aewsme');
-3
+```text
+fuzzy_damlev(x, y)
 ```
 
-Only ASCII strings are supported. Use the [`translit`](#transliteration) function to convert the input string from UTF-8 to pure ASCII.
+Calculates the Damerau-Levenshtein distance.
 
-## Phonetic Codes
-
-Compute phonetic string code:
-
--   `caverphone(x)` - Caverphone code,
--   `phonetic_hash(x)` - Spellcheck phonetic code,
--   `soundex(x)` - Soundex code,
--   `rsoundex(x)` - Refined Soundex code.
-
-```
-sqlite> select caverphone('awesome');
-AWSM111111
-
-sqlite> select phonetic_hash('awesome');
-ABACAMA
-
-sqlite> select soundex('awesome');
-A250
-
-sqlite> select rsoundex('awesome');
-A03080
+```sql
+select fuzzy_damlev('awesome', 'aewsme');
+-- 2
 ```
 
-Only ASCII strings are supported. Use the [`translit`](#transliteration) function to convert the input string from UTF-8 to pure ASCII.
+### fuzzy_editdist
+
+```text
+fuzzy_editdist(x, y)
+```
+
+Calculates the spellcheck edit distance.
+
+```sql
+select fuzzy_editdist('awesome', 'aewsme');
+-- 215
+```
+
+### fuzzy_hamming
+
+```text
+fuzzy_hamming(x, y)
+```
+
+Calculates the Hamming distance.
+
+```sql
+select fuzzy_hamming('awesome', 'aewsome');
+-- 2
+```
+
+### fuzzy_jarowin
+
+```text
+fuzzy_jarowin(x, y)
+```
+
+Calculates the Jaro-Winkler distance.
+
+```sql
+select fuzzy_jarowin('awesome', 'aewsme');
+-- 0.907142857142857
+```
+
+### fuzzy_leven
+
+Calculates the Levenshtein distance.
+
+```sql
+select fuzzy_leven('awesome', 'aewsme');
+-- 3
+```
+
+### fuzzy_osadist
+
+```text
+fuzzy_osadist(x, y)
+```
+
+Calculates the Optimal String Alignment distance.
+
+```sql
+select fuzzy_osadist('awesome', 'aewsme');
+-- 3
+```
+
+## Phonetic codes
+
+These functions compute phonetic string codes.
+
+Only ASCII strings are supported. Use the [translit](#transliteration) function to convert the input string from UTF-8 to plain ASCII.
+
+[caver](#fuzzy_caver) •
+[phonetic](#fuzzy_phonetic) •
+[soundex](#fuzzy_soundex) •
+[rsoundex](#fuzzy_rsoundex)
+
+### fuzzy_caver
+
+```text
+fuzzy_caver(x)
+```
+
+Calculates the Caverphone code.
+
+```sql
+select fuzzy_caver('awesome');
+-- AWSM111111
+```
+
+### fuzzy_phonetic
+
+```text
+fuzzy_phonetic(x)
+```
+
+Calsulates the spellcheck phonetic code.
+
+```sql
+select fuzzy_phonetic('awesome');
+-- ABACAMA
+```
+
+### fuzzy_soundex
+
+```text
+fuzzy_soundex(x)
+```
+
+Calculates the Soundex code.
+
+```sql
+select fuzzy_soundex('awesome');
+-- A250
+```
+
+### fuzzy_rsoundex
+
+```text
+fuzzy_rsoundex(x)
+```
+
+Calculates the Refined Soundex code.
+
+```sql
+select fuzzy_rsoundex('awesome');
+-- A03080
+```
 
 ## Transliteration
 
-Transliteration converts the input string from UTF-8 into pure ASCII
+```text
+fuzzy_translit(str)
+```
+
+Transliteration converts the input string from UTF-8 into plain ASCII
 by converting all non-ASCII characters to some combination of characters
 in the ASCII subset.
 
 The distance and phonetic functions are ASCII only, so to work
 with a Unicode string, you should first transliterate it:
 
-```
-sqlite> select translit('sí señor');
-si senor
+```sql
+select fuzzy_translit('sí señor');
+-- si senor
 
-sqlite> select translit('привет');
-privet
+select fuzzy_translit('привет');
+-- privet
 ```
 
 Some characters may be lost:
 
-```
-sqlite> select translit('oh my 😅');
-oh my ?
+```sql
+select fuzzy_translit('oh my 😅');
+-- oh my ?
 ```
 
-## Installation and Usage
+## Acknowledgements
+
+Adapted from [libstrcmp](https://github.com/Rostepher/libstrcmp) by Ross Bayer and [spellfix.c](https://www.sqlite.org/src/file/ext/misc/spellfix.c) by D. Richard Hipp.
+
+## Installation and usage
 
 SQLite command-line interface:
 
 ```
 sqlite> .load ./fuzzy
-sqlite> select soundex('hello');
+sqlite> select fuzzy_soundex('hello');
 ```
 
-See [How to Install an Extension](install.md) for usage with IDE, Python, etc.
+See [How to install an extension](install.md) for usage with IDE, Python, etc.
 
-[⬇️ Download](https://github.com/nalgeon/sqlean/releases/latest) •
-[✨ Explore](https://github.com/nalgeon/sqlean) •
-[🚀 Follow](https://antonz.org/subscribe/)
+↓ [Download](https://github.com/nalgeon/sqlean/releases/latest) the extension.
+
+⛱ [Explore](https://github.com/nalgeon/sqlean) other extensions.
+
+★ [Subscribe](https://antonz.org/subscribe/) to stay on top of new features.

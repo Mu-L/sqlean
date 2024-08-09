@@ -1,4 +1,4 @@
-# All the Missing SQLite Functions
+# All the missing SQLite functions
 
 SQLite has few functions compared to other database management systems. SQLite authors see this as a feature rather than a problem, because SQLite has an extension mechanism in place.
 
@@ -29,8 +29,8 @@ Think of them as the extended standard library for SQLite:
 -   [math](docs/math.md): math functions
 -   [regexp](docs/regexp.md): regular expressions
 -   [stats](docs/stats.md): math statistics
--   [text](docs/text.md): string functions
--   [unicode](docs/unicode.md): Unicode support
+-   [text](docs/text.md): string functions and Unicode
+-   [time](docs/time.md): high-precision date/time
 -   [uuid](docs/uuid.md): Universally Unique IDentifiers
 -   [vsv](docs/vsv.md): CSV files as virtual tables
 
@@ -67,7 +67,7 @@ sqlite> .load ./sqlean
 sqlite> select median(value) from generate_series(1, 99);
 ```
 
-See [How to Install an Extension](docs/install.md) for usage with IDE, Python, JavaScript, etc.
+See [How to install an extension](docs/install.md) for usage with IDE, Python, JavaScript, etc.
 
 ## Building from source
 
@@ -114,7 +114,7 @@ The software is available under the MIT License.
 
 Sqlean is kindly sponsored by [Paul Harrington](https://github.com/phrrngtn). Thank you, Paul!
 
-If you find Sqlean useful, please consider sponsoring it on GitHub. It really helps to move the project forward.
+If you find Sqlean useful, consider sponsoring me on GitHub. It really helps to move the project forward.
 
 ♥ [Become a sponsor](https://github.com/sponsors/nalgeon) to support Sqlean.
 

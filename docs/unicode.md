@@ -1,6 +1,14 @@
-# unicode: Unicode Support for SQLite
+# unicode: Unicode support for SQLite
 
-Implements case-insensitive string comparison for Unicode strings. Has no external dependencies (like libicu). Adapted from [sqlite3_unicode](https://github.com/Zensey/sqlite3_unicode).
+**⛔️ This extension is deprecated. Use [text](text.md) instead.**
+
+The `sqlean-unicode` extension implements case-insensitive string comparison for Unicode strings. Has no external dependencies (like libicu).
+
+[Reference](#reference) •
+[Acknowledgements](#acknowledgements) •
+[Installation and usage](#installation-and-usage)
+
+## Reference
 
 Provides the following unicode features:
 
@@ -10,7 +18,7 @@ Provides the following unicode features:
 
 Tries to override the default NOCASE case-insensitive collation sequence to support UTF-8 characters (available in SQLite CLI and C API only).
 
-### Upper and Lower
+### Upper and lower
 
 ```
 sqlite> select upper('привет');
@@ -53,7 +61,11 @@ sqlite> select unaccent('hôtel');
 hotel
 ```
 
-## Installation and Usage
+## Acknowledgements
+
+Adapted from [sqlite3_unicode](https://github.com/Zensey/sqlite3_unicode).
+
+## Installation and usage
 
 Before:
 
@@ -74,8 +86,10 @@ sqlite> select upper('привет');
 ПРИВЕТ
 ```
 
-See [How to Install an Extension](install.md) for usage with IDE, Python, etc.
+See [How to install an extension](install.md) for usage with IDE, Python, etc.
 
-[⬇️ Download](https://github.com/nalgeon/sqlean/releases/latest) •
-[✨ Explore](https://github.com/nalgeon/sqlean) •
-[🚀 Follow](https://antonz.org/subscribe/)
+↓ [Download](https://github.com/nalgeon/sqlean/releases/latest) the extension.
+
+⛱ [Explore](https://github.com/nalgeon/sqlean) other extensions.
+
+★ [Subscribe](https://antonz.org/subscribe/) to stay on top of new features.
